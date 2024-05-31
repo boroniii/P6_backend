@@ -42,9 +42,7 @@ exports.getBestrating = (req, res, next) => {
         .sort({averageRating: -1})
         .limit(3)
         .then(
-            (books) => {
-                res.status(200).json(books);
-            }
+            res.status(200).json
         )
         .catch(
             (error) => {

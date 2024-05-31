@@ -6,11 +6,7 @@ const path = require('path');
 const userRoutes = require('./routes/user');
 const bookRoutes = require('./routes/book');
 
-mongoose.connect('mongodb+srv://admin:E1E4JwNPvuOa8IdQ@cluster0.dzfwr4i.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
-    { 
-        useNewUrlParser: true,
-        useUnifiedTopology: true 
-    })
+mongoose.connect('mongodb+srv://admin:E1E4JwNPvuOa8IdQ@cluster0.dzfwr4i.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
     .then(() => console.log('Connexion à MongoDB réussie !'))
     .catch(() => console.log('Connexion à MongoDB échouée !')
 );
