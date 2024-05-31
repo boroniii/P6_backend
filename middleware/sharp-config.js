@@ -4,14 +4,20 @@ const path = require('path');
 module.exports = (req, res, next) => {
     try{
         const { buffer, originalname } = req.file;
-        const timestamp = new Date().toISOString();
-        const ref = `${timestamp}-${originalname}.webp`;
+                
+        const name = originalname.split(' ').join('_');
+        const ref = `${name}${Date.now()}.webp`;
+
+        console.log(ref);
+
         let filePath = path.join(__dirname, '../images/'+ref);
         sharp(buffer)
             .webp({ quality: 20 })
             .toFile(filePath)
-            .then(
-                () => next()
+            .then(() => {
+                req.file.filename = ref;
+                next();
+            }
             );
     }catch(error){
         res.status(500).json({error});

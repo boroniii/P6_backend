@@ -56,6 +56,8 @@ exports.createBook = (req, res, next) => {
     delete bookObject._id;
     delete bookObject._userId;
 
+    console.log('createBook filename', req.file);
+
     const book = new Book({
         ...bookObject,
         userId: req.auth.userId,
