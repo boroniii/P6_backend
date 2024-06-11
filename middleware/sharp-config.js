@@ -12,6 +12,7 @@ module.exports = (req, res, next) => {
 
         let filePath = path.join(__dirname, '../images/'+ref);
         sharp(buffer)
+            .resize({height:800})
             .webp({ quality: 20 })
             .toFile(filePath)
             .then(() => {

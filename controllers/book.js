@@ -42,7 +42,9 @@ exports.getBestrating = (req, res, next) => {
         .sort({averageRating: -1})
         .limit(3)
         .then(
-            res.status(200).json
+            (book) => {
+                res.status(200).json(book);
+            }
         )
         .catch(
             (error) => {
@@ -55,8 +57,6 @@ exports.createBook = (req, res, next) => {
     const bookObject = JSON.parse(req.body.book);
     delete bookObject._id;
     delete bookObject._userId;
-
-    console.log('createBook filename', req.file);
 
     const book = new Book({
         ...bookObject,
@@ -83,6 +83,19 @@ exports.modifyBook = (req, res, next) => {
             if(book.userId != req.auth.userId) {
                 res.status(401).json({message: 'Non-autorisé'});
             } else {
+                if(req.file){
+                    //si on avait un file dans la requete, on recupère l'url de l'image stocké dans la BD et on la supprime
+                    const filename = book.imageUrl.split('/images/')[1];
+                    fs.unlink(`images/${filename}`,
+                        (err => {
+                            if(err){
+                                console.log("erreur lors de la suppression de l'image précedente :", err);
+                            }else{
+                                console.log("l'image précedente a bien été supprimé");
+                            }
+                        })
+                    )
+                }
                 Book.updateOne({ _id: req.params.id}, {...bookObject, _id: req.params.id})
                     .then(() => res.status(200).json({message: 'Livre modifié !'}))
                     .catch(error => res.status(401).json({error}));
@@ -114,19 +127,6 @@ exports.deleteBook = (req, res, next) => {
 };
 
 exports.rateBook = (req, res, next) => {
-    // POST 
-    // /api/books/:id/rating 
-    // Requis { userId: String,
-    //          rating: Number }
-    //     Single book Définit la note pour le user ID fourni.
-    //     La note doit être comprise entre 0 et 5.
-    //     L'ID de l'utilisateur et la note doivent être ajoutés au
-    //     tableau "rating" afin de ne pas laisser un utilisateur
-    //     noter deux fois le même livre.
-    //     Il n’est pas possible de modifier une note.
-    //     La note moyenne "averageRating" doit être tenue à
-    //     jour, et le livre renvoyé en réponse de la requête.
-   
     Book.findOne({_id: req.params.id})
         .then(
             book => {
@@ -145,7 +145,7 @@ exports.rateBook = (req, res, next) => {
                             sum += element.grade;
                     });
                     let avg = sum / book.ratings.length;
-                    book.averageRating = avg;
+                    book.averageRating = avg.toFixed(1);
                     book.save()
                         .then(() => res.status(200).json(book))
                         .catch(error => res.status(500).json({error}));
@@ -154,43 +154,3 @@ exports.rateBook = (req, res, next) => {
         )
         .catch(error => res.status(404).json({error}));
 };
-
-// Book.findOne({_id: req.params.id})
-//         .then(book =>
-//             {
-//                 if(book.ratings.includes(req.auth.userId)){
-//                     res.status(403).json({message: 'Vous avez deja noté ce livre'});
-//                 }else{
-//                     Book.updateOne(
-//                             {_id: req.params.id},
-//                             [
-//                                 {$push:
-//                                     {
-//                                         ratings:
-//                                         {
-//                                             userId: req.auth.userId,
-//                                             grade: req.body.rating
-//                                         }
-//                                     }
-//                                 }
-//                                 ,
-//                                 {$set:
-//                                     {
-//                                         averageRating: {$avg: ratings.grade}
-//                                     }
-//                                 }
-//                             ]
-//                         )
-//                         .then(() =>
-//                             {
-//                             Book.findOne({_id: req.params.id})
-//                                 .then(book => res.status(200).json(book))
-//                                 .catch(error => res.status(500).json({error}));
-//                             }
-//                         )
-//                         .catch(error => res.status(500).json({error}));
-//                 }
-//             }
-//         )
-//         .catch(error => res.status(400).json({error}));
-// }
