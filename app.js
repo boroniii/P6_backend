@@ -2,11 +2,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 
+require('dotenv').config();
+
 //mes routes
 const userRoutes = require('./routes/user');
 const bookRoutes = require('./routes/book');
 
-mongoose.connect('mongodb+srv://admin:E1E4JwNPvuOa8IdQ@cluster0.dzfwr4i.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+//connexion à la BD
+mongoose.connect(process.env.DB_CONNECT)
     .then(() => console.log('Connexion à MongoDB réussie !'))
     .catch(() => console.log('Connexion à MongoDB échouée !')
 );

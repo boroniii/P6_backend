@@ -2,6 +2,10 @@ const sharp = require('sharp');
 const path = require('path');
 
 module.exports = (req, res, next) => {
+    
+    if(!req.file){
+        return next();
+    }
     try{
         const { buffer, originalname } = req.file;
                 
